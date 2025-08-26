@@ -7,32 +7,44 @@ git clone https://github.com/MattiasMR/aws-mcserver-forge.git
 cd aws-mcserver-forge/
 
 ```
-2. **Descarga el modpack (serverpack) de curseforge, utiliza la URL directa**
-```bash
-curl -fL -C - -o serverpack.zip "URL_DEL_CDN_MEDIAFILEZ_DE_TU_SERVERPACK.zip"
-unzip -l serverpack.zip | grep -Ei 'Server(Start| Files)|forge-1\.12\.2|minecraft_server\.1\.12\.2|start\.sh'
-```
-> URL Directa: en tu PC abre el enlace .../download/<FILE_ID>, deja que descargue, y copia la URL final del archivo desde el gestor de descargas; esa es la del CDN.
+2. **Consigue la URL directa del Server Pack**
+En tu PC abre el enlace .../download/<FILE_ID>, deja que descargue y copia la URL final del archivo desde el gestor de descargas; esa es la del CDN (p. ej. https://mediafilez.forgecdn.net/.../serverpack.zip).
 
-3. **Editar el archivo de setup**
-Todas las configs están arriba. (Java, ram, etc.)
-```bash
-nano setup.sh   
-```
-
-4. **Guarda y ejecuta**
+3. **Ejecuta el setup con la URL directa**
 ```bash
 chmod +x setup.sh
-sudo ./setup.sh
+XMS=6G XMX=6G sudo ./setup.sh \
+  --java 8 \
+  --url "https://mediafilez.forgecdn.net/.../serverpack.zip" \
+  --forge auto
 ```
+> Notas:
+> - --java 8 es lo típico para Forge 1.12.2 (RLCraft).
+> - Cambia XMS/XMX según la RAM de tu instancia (mínimo recomendado 4–6 GB para packs pesados).
 
-5. **Comprobar servicio y logs**
+4. **Comprobar servicio y logs**
 ```bash
 sudo systemctl status minecraft --no-pager
 sudo journalctl -u minecraft -f
 ```
 
-6. **Nota de red**
+5. **Nota de red**
 ```bash
 Abre el puerto 25565/TCP en el Security Group de la instancia.
 ```
+
+6. **Ejemplos útiles**
+- Usar un ZIP ya subido a la instancia:
+```bash
+XMS=8G XMX=8G sudo ./setup.sh --local /tmp/serverpack.zip --forge auto
+```
+
+- Forzar una versión concreta de Forge (si el pack no trae installer/manifest):
+```bash
+sudo ./setup.sh --forge 1.12.2-14.23.5.2860
+```
+
+7. **Troubleshooting rápido**
+- 403 al descargar: la URL no es la directa del CDN (vuelve al paso 2).
+- “No encuentro el JAR del servidor”: el ZIP podría ser de cliente; usa el Server Pack.
+- RAM insuficiente: sube XMS/XMX o usa una instancia con más memoria.
